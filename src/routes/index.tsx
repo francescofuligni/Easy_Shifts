@@ -4,6 +4,7 @@ import { COMPANY_PROFILES, DEFAULT_PROFILE_ID, getProfile } from "@/lib/companyP
 import { analyseSheet, cellToText, readWorkbook, type SheetLayout, type WorkbookData } from "@/lib/excelParser";
 import { parseShiftCode } from "@/lib/shiftParser";
 import { downloadIcs, generateIcs, safeFileName, type CalendarEvent } from "@/lib/icsGenerator";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -247,14 +248,17 @@ function Index() {
   return (
     <div className="min-h-screen bg-background">
       <div className="bg-gradient-brand">
-        <header className="mx-auto w-full max-w-4xl px-4 py-12 text-center sm:py-16">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.25em] text-brand-foreground/80">
+        <div className="mx-auto flex w-full max-w-4xl justify-end px-4 pt-4">
+          <ThemeToggle />
+        </div>
+        <header className="mx-auto w-full max-w-4xl px-4 pb-12 pt-6 text-center sm:pb-16">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.25em] text-brand-foreground">
             Dai turni al calendario
           </p>
           <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-brand-foreground sm:text-5xl">
             Turni Facili
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-sm text-brand-foreground/90 sm:text-base">
+          <p className="mx-auto mt-4 max-w-xl text-sm text-brand-foreground sm:text-base">
             Carica il file Excel dei turni: viene letto il primo foglio del file. Scegli il tuo cognome e scarica il
             calendario. Tutto avviene nel tuo browser, nessun dato viene inviato.
           </p>
