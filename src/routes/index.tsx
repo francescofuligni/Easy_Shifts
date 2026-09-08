@@ -117,7 +117,7 @@ function MonthGrid({ year, month, rows }: { year: number; month: number; rows: P
                 <>
                   <span className="block text-[0.7rem] font-semibold text-muted-foreground">{day}</span>
                   {shift && (
-                    <span className="mt-0.5 block text-[0.7rem] font-bold leading-tight text-accent-foreground">
+                    <span className="mt-0.5 block text-[0.7rem] font-bold leading-tight text-foreground">
                       {shift.title}
                       <span className="block font-medium">
                         {shift.start === "Tutto il giorno" ? "tutto il giorno" : `${shift.start}–${shift.end}`}
