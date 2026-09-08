@@ -439,8 +439,32 @@ function Index() {
           </Card>
         )}
 
-        <footer className="pt-4 text-center text-xs text-muted-foreground">
-          Nessun dato viene inviato o salvato: tutto avviene nel tuo browser e si azzera al ricaricamento della pagina.
+        <footer className="space-y-3 pt-6 text-center text-xs text-muted-foreground">
+          <p>Nessun dato viene inviato o salvato: tutto avviene nel tuo browser e si azzera al ricaricamento della pagina.</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <a
+              href="https://github.com/francescofuligni"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 underline-offset-2 transition-colors hover:text-accent-foreground hover:underline"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 fill-current">
+                <path d="M12 .297C5.37.297 0 5.67 0 12.297c0 5.304 3.438 9.8 8.207 11.387.6.11.793-.26.793-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.73.083-.73 1.205.085 1.84 1.236 1.84 1.236 1.07 1.835 2.807 1.305 3.492.998.108-.776.42-1.305.763-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.468-2.382 1.235-3.22-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.3 1.23A11.51 11.51 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.29-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.873.118 3.176.77.838 1.233 1.91 1.233 3.22 0 4.61-2.807 5.625-5.48 5.92.43.372.815 1.103.815 2.222 0 1.606-.015 2.898-.015 3.293 0 .32.192.694.8.577C20.565 22.092 24 17.598 24 12.297 24 5.67 18.627.297 12 .297z" />
+              </svg>
+              GitHub
+            </a>
+            <a
+              href="https://linktr.ee/francescofuligni"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 underline-offset-2 transition-colors hover:text-accent-foreground hover:underline"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 fill-current">
+                <path d="M7.2 3.6a1.2 1.2 0 011.2 1.2 1.2 1.2 0 01-1.2 1.2A1.2 1.2 0 016 4.8a1.2 1.2 0 011.2-1.2zm0 7.2a1.2 1.2 0 011.2 1.2 1.2 1.2 0 01-1.2 1.2A1.2 1.2 0 016 12a1.2 1.2 0 011.2-1.2zm0 7.2a1.2 1.2 0 011.2 1.2 1.2 1.2 0 01-1.2 1.2A1.2 1.2 0 016 19.2a1.2 1.2 0 011.2-1.2zM12 6a6 6 0 016 6 6 6 0 01-6 6 6 6 0 01-6-6 6 6 0 016-6zm0 1.2A4.8 4.8 0 007.2 12 4.8 4.8 0 0012 16.8 4.8 4.8 0 0016.8 12 4.8 4.8 0 0012 7.2z" />
+              </svg>
+              Linktree
+            </a>
+          </div>
         </footer>
       </main>
     </div>
