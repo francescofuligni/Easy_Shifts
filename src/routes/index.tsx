@@ -307,7 +307,7 @@ function Index() {
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="mt-3 inline-flex items-center justify-center rounded-xl border border-brand bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-3 inline-flex items-center justify-center rounded-xl border border-brand bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
               Scegli file
             </button>
