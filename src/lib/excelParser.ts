@@ -99,6 +99,12 @@ export function analyseSheet(grid: unknown[][], profile: CompanyProfile): SheetL
 
   if (people.length === 0) return null;
 
+  // Ordine alfabetico (italiano, case/accent-insensitive), a parità di nome per riga
+  people.sort(
+    (a, b) =>
+      a.name.localeCompare(b.name, "it", { sensitivity: "base", numeric: true }) || a.excelRow - b.excelRow,
+  );
+
   bestDays.sort((a, b) => a.date.getTime() - b.date.getTime());
   return { dateRowIndex: bestRow, days: bestDays, people };
 }
