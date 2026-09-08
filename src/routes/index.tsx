@@ -8,16 +8,16 @@ import { downloadIcs, generateIcs, safeFileName, type CalendarEvent } from "@/li
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Turni → Calendario | Da Excel a file .ics" },
+      { title: "Turni Facili | Dai turni Excel al tuo calendario" },
       {
         name: "description",
         content:
-          "Converti il tuo foglio Excel dei turni in un calendario .ics da importare in Apple Calendar o Google Calendar. Tutto nel tuo browser.",
+          "Carica il foglio Excel dei turni, scegli il cognome e scarica il calendario .ics per Apple Calendar o Google Calendar. Tutto nel tuo browser.",
       },
-      { property: "og:title", content: "Turni → Calendario" },
+      { property: "og:title", content: "Turni Facili" },
       {
         property: "og:description",
-        content: "Converti i turni Excel in un file .ics per Apple Calendar o Google Calendar, senza inviare dati.",
+        content: "Dai turni Excel al calendario in pochi secondi, senza inviare dati.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -36,7 +36,6 @@ interface PreviewRow {
   event?: CalendarEvent;
 }
 
-const WEEKDAYS = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"];
 const MONTHS = [
   "gennaio",
   "febbraio",
@@ -51,25 +50,20 @@ const MONTHS = [
   "novembre",
   "dicembre",
 ];
-
-function fmtDate(d: Date): string {
-  return `${WEEKDAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-}
+const WEEK_LABELS = ["lun", "mar", "mer", "gio", "ven", "sab", "dom"];
 
 function fmtTime(base: Date, minutes: number): string {
   const d = new Date(base);
   d.setMinutes(d.getMinutes() + minutes);
-  const label = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-  const nextDay = d.getDate() !== base.getDate();
-  return nextDay ? `${label} (+1 g)` : label;
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
+function Card({ step, title, children }: { step: number; title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
-      <h2 className="mb-4 flex items-center gap-3 text-base font-semibold text-foreground sm:text-lg">
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-          {n}
+    <section className="rounded-2xl border border-border/70 bg-card/90 p-5 shadow-soft backdrop-blur sm:p-7">
+      <h2 className="mb-5 flex items-center gap-3 font-display text-lg font-bold tracking-tight text-foreground sm:text-xl">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-brand text-sm font-bold text-brand-foreground">
+          {step}
         </span>
         {title}
       </h2>
@@ -78,13 +72,72 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
   );
 }
 
+/** Griglia mensile con i turni */
+function MonthGrid({ year, month, rows }: { year: number; month: number; rows: PreviewRow[] }) {
+  const byDay = new Map<number, PreviewRow>();
+  for (const r of rows) byDay.set(r.date.getDate(), r);
+
+  const first = new Date(year, month, 1);
+  const offset = (first.getDay() + 6) % 7; // lunedì = 0
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells: (number | null)[] = [
+    ...Array.from({ length: offset }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  return (
+    <div className="rounded-2xl border border-border bg-background p-3 sm:p-4">
+      <h3 className="mb-3 font-display text-base font-bold capitalize text-foreground">
+        {MONTHS[month]} {year}
+      </h3>
+      <div className="grid grid-cols-7 gap-1 text-center text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground">
+        {WEEK_LABELS.map((w) => (
+          <div key={w} className="py-1">
+            {w}
+          </div>
+        ))}
+      </div>
+      <div className="mt-1 grid grid-cols-7 gap-1">
+        {cells.map((day, i) => {
+          const shift = day ? byDay.get(day) : undefined;
+          return (
+            <div
+              key={i}
+              className={`min-h-16 rounded-lg border p-1 text-left sm:min-h-20 ${
+                day === null
+                  ? "border-transparent"
+                  : shift
+                    ? "border-brand/40 bg-brand-soft"
+                    : "border-border bg-muted/40"
+              }`}
+            >
+              {day !== null && (
+                <>
+                  <span className="block text-[0.7rem] font-semibold text-muted-foreground">{day}</span>
+                  {shift && (
+                    <span className="mt-0.5 block text-[0.7rem] font-bold leading-tight text-accent-foreground">
+                      {shift.title}
+                      <span className="block font-medium">
+                        {shift.start === "Tutto il giorno" ? "tutto il giorno" : `${shift.start}–${shift.end}`}
+                      </span>
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function Index() {
   const [profileId, setProfileId] = useState(DEFAULT_PROFILE_ID);
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [workbook, setWorkbook] = useState<WorkbookData | null>(null);
-  const [sheetName, setSheetName] = useState<string>("");
   const [personRow, setPersonRow] = useState<number | null>(null);
-  const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -92,6 +145,7 @@ function Index() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const profile = getProfile(profileId);
+  const sheetName = workbook?.sheetNames[0] ?? "";
 
   const layout: SheetLayout | null = useMemo(() => {
     if (!workbook || !sheetName) return null;
@@ -99,12 +153,6 @@ function Index() {
     if (!grid) return null;
     return analyseSheet(grid, profile);
   }, [workbook, sheetName, profile]);
-
-  const filteredPeople = useMemo(() => {
-    if (!layout) return [];
-    const q = search.trim().toLowerCase();
-    return q ? layout.people.filter((p) => p.name.toLowerCase().includes(q)) : layout.people;
-  }, [layout, search]);
 
   const rows: PreviewRow[] = useMemo(() => {
     if (!workbook || !layout || personRow === null) return [];
@@ -143,19 +191,31 @@ function Index() {
   const invalidRows = rows.filter((r) => !r.ok);
   const selectedPerson = layout?.people.find((p) => p.rowIndex === personRow) ?? null;
 
-  function reset() {
+  const months = useMemo(() => {
+    const keys = new Map<string, { year: number; month: number; rows: PreviewRow[] }>();
+    for (const r of validRows) {
+      const k = `${r.date.getFullYear()}-${r.date.getMonth()}`;
+      if (!keys.has(k)) keys.set(k, { year: r.date.getFullYear(), month: r.date.getMonth(), rows: [] });
+      keys.get(k)!.rows.push(r);
+    }
+    return [...keys.values()].sort((a, b) => a.year - b.year || a.month - b.month);
+  }, [validRows]);
+
+  function pickFile(f: File) {
+    setFile(f);
+    setWorkbook(null);
     setPersonRow(null);
-    setSearch("");
+    setError(null);
     setNote(null);
   }
 
-  async function handleFile(file: File) {
+  async function process() {
+    if (!file) return;
     setError(null);
     setNote(null);
     setLoading(true);
     setWorkbook(null);
     setPersonRow(null);
-    setSearch("");
     try {
       const name = file.name.toLowerCase();
       if (!name.endsWith(".xlsx") && !name.endsWith(".xls")) {
@@ -164,10 +224,7 @@ function Index() {
       const data = await readWorkbook(file);
       if (data.sheetNames.length === 0) throw new Error("Il file non contiene fogli leggibili.");
       setWorkbook(data);
-      setSheetName(data.sheetNames[0]!);
-      setFileName(file.name);
     } catch (e) {
-      setFileName(null);
       setError(e instanceof Error ? e.message : "Impossibile leggere il file.");
     } finally {
       setLoading(false);
@@ -177,27 +234,35 @@ function Index() {
   function download(kind: "apple" | "google") {
     if (!selectedPerson || validRows.length === 0) return;
     const events = validRows.map((r) => r.event!);
-    const first = validRows[0]!.date;
+    const firstDate = validRows[0]!.date;
     const ics = generateIcs(events, profile.timeZone);
-    downloadIcs(ics, safeFileName(selectedPerson.name, first.getMonth() + 1, first.getFullYear()));
+    downloadIcs(ics, safeFileName(selectedPerson.name, firstDate.getMonth() + 1, firstDate.getFullYear()));
     setNote(
       kind === "apple"
-        ? "Apri il file scaricato con Calendar e scegli il calendario di destinazione."
+        ? "Apri il file scaricato con Calendario e scegli il calendario di destinazione."
         : "Importa il file scaricato in Google Calendar da computer, scegliendo il calendario di destinazione.",
     );
   }
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-12">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Turni → Calendario</h1>
-        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-          Carica il foglio Excel dei turni, scegli la persona e scarica un file .ics da importare nel tuo calendario.
-        </p>
-      </header>
+    <div className="min-h-screen bg-background">
+      <div className="bg-gradient-brand">
+        <header className="mx-auto w-full max-w-4xl px-4 py-12 text-center sm:py-16">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.25em] text-brand-foreground/80">
+            Dai turni al calendario
+          </p>
+          <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-brand-foreground sm:text-5xl">
+            Turni Facili
+          </h1>
+          <p className="mx-auto mt-4 max-w-xl text-sm text-brand-foreground/90 sm:text-base">
+            Carica il file Excel dei turni: viene letto il primo foglio del file. Scegli il tuo cognome e scarica il
+            calendario. Tutto avviene nel tuo browser, nessun dato viene inviato.
+          </p>
+        </header>
+      </div>
 
-      <div className="space-y-5">
-        <Step n={1} title="Scegli azienda e formato">
+      <main className="mx-auto -mt-8 w-full max-w-4xl space-y-5 px-4 pb-16">
+        <Card step={1} title="Carica il file e scegli l'azienda">
           <label htmlFor="azienda" className="mb-2 block text-sm font-medium text-foreground">
             Azienda / formato
           </label>
@@ -206,9 +271,10 @@ function Index() {
             value={profileId}
             onChange={(e) => {
               setProfileId(e.target.value);
-              reset();
+              setPersonRow(null);
+              setNote(null);
             }}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full rounded-xl border border-input bg-background px-3 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             {COMPANY_PROFILES.map((p) => (
               <option key={p.id} value={p.id}>
@@ -216,9 +282,7 @@ function Index() {
               </option>
             ))}
           </select>
-        </Step>
 
-        <Step n={2} title="Carica il file Excel">
           <div
             onDragOver={(e) => {
               e.preventDefault();
@@ -229,17 +293,17 @@ function Index() {
               e.preventDefault();
               setDragging(false);
               const f = e.dataTransfer.files?.[0];
-              if (f) void handleFile(f);
+              if (f) pickFile(f);
             }}
-            className={`rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
-              dragging ? "border-primary bg-accent" : "border-border bg-muted/40"
+            className={`mt-4 rounded-2xl border-2 border-dashed p-6 text-center transition-colors ${
+              dragging ? "border-brand bg-brand-soft" : "border-border bg-muted/40"
             }`}
           >
-            <p className="text-sm text-muted-foreground">Trascina qui il file oppure</p>
+            <p className="text-sm text-muted-foreground">Trascina qui il file Excel oppure</p>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="mt-3 inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              className="mt-3 inline-flex items-center justify-center rounded-xl border border-brand bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
             >
               Scegli file
             </button>
@@ -251,170 +315,114 @@ function Index() {
               className="sr-only"
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) void handleFile(f);
+                if (f) pickFile(f);
                 e.target.value = "";
               }}
             />
-            <p className="mt-3 text-xs text-muted-foreground">
-              Il file viene elaborato solo nel tuo browser e non viene salvato.
-            </p>
+            {file && (
+              <p className="mt-3 text-sm text-foreground">
+                File scelto: <span className="font-semibold">{file.name}</span>
+              </p>
+            )}
           </div>
-          {loading && <p className="mt-3 text-sm text-muted-foreground">Lettura del file in corso…</p>}
-          {fileName && !loading && (
-            <p className="mt-3 text-sm text-foreground">
-              File caricato: <span className="font-medium">{fileName}</span>
-            </p>
-          )}
+
+          <button
+            type="button"
+            disabled={!file || loading}
+            onClick={() => void process()}
+            className="mt-4 w-full rounded-xl bg-gradient-brand px-4 py-4 font-display text-base font-bold text-brand-foreground shadow-soft transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {loading ? "Lettura in corso…" : "Ottieni calendario"}
+          </button>
+
           {error && (
-            <p role="alert" className="mt-3 rounded-lg bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+            <p role="alert" className="mt-3 rounded-xl bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
               {error}
             </p>
           )}
-        </Step>
-
-        {workbook && (
-          <Step n={3} title="Scegli il foglio">
-            {workbook.sheetNames.length > 1 ? (
-              <>
-                <label htmlFor="foglio" className="mb-2 block text-sm font-medium text-foreground">
-                  Foglio del file
-                </label>
-                <select
-                  id="foglio"
-                  value={sheetName}
-                  onChange={(e) => {
-                    setSheetName(e.target.value);
-                    reset();
-                  }}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  {workbook.sheetNames.map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Il file contiene un solo foglio: <span className="font-medium text-foreground">{sheetName}</span>.
-              </p>
-            )}
-            {!layout && (
-              <p role="alert" className="mt-3 rounded-lg bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
-                In questo foglio non sono state trovate date o persone valide. Scegli un altro foglio o verifica il file.
-              </p>
-            )}
-          </Step>
-        )}
+          {workbook && !layout && (
+            <p role="alert" className="mt-3 rounded-xl bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+              Nel primo foglio non sono state trovate date o persone valide. Verifica il file.
+            </p>
+          )}
+        </Card>
 
         {layout && (
-          <Step n={4} title="Scegli la persona">
-            <label htmlFor="ricerca" className="mb-2 block text-sm font-medium text-foreground">
-              Cerca per cognome
+          <Card step={2} title="Scegli il cognome">
+            <label htmlFor="cognome" className="mb-2 block text-sm font-medium text-foreground">
+              Cognome ({layout.people.length} trovati nel file)
             </label>
-            <input
-              id="ricerca"
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Es. ROSSI"
-              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            <ul className="mt-3 max-h-72 space-y-1 overflow-y-auto" aria-label="Elenco persone">
-              {filteredPeople.map((p) => {
-                const active = p.rowIndex === personRow;
-                return (
-                  <li key={p.rowIndex}>
-                    <button
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => {
-                        setPersonRow(p.rowIndex);
-                        setNote(null);
-                      }}
-                      className={`w-full rounded-lg border px-3 py-2.5 text-left text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${
-                        active
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-background text-foreground hover:bg-accent"
-                      }`}
-                    >
-                      <span className="font-medium">{p.name}</span>
-                      <span className={active ? "opacity-80" : "text-muted-foreground"}> — riga {p.excelRow}</span>
-                    </button>
-                  </li>
-                );
-              })}
-              {filteredPeople.length === 0 && (
-                <li className="px-1 py-2 text-sm text-muted-foreground">Nessuna persona trovata.</li>
-              )}
-            </ul>
-          </Step>
+            <select
+              id="cognome"
+              value={personRow ?? ""}
+              onChange={(e) => {
+                setPersonRow(e.target.value === "" ? null : Number(e.target.value));
+                setNote(null);
+              }}
+              className="w-full rounded-xl border border-input bg-background px-3 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="">— Seleziona un cognome —</option>
+              {layout.people.map((p) => (
+                <option key={p.rowIndex} value={p.rowIndex}>
+                  {p.name} (riga {p.excelRow})
+                </option>
+              ))}
+            </select>
+          </Card>
         )}
 
         {selectedPerson && (
-          <Step n={5} title="Controlla i turni">
+          <Card step={3} title="Esporta e controlla il calendario">
             <p className="text-sm text-muted-foreground">
-              Persona: <span className="font-medium text-foreground">{selectedPerson.name}</span> (riga{" "}
-              {selectedPerson.excelRow}) · <span className="font-medium text-foreground">{validRows.length}</span> eventi
-              da esportare
+              <span className="font-semibold text-foreground">{selectedPerson.name}</span> ·{" "}
+              <span className="font-semibold text-foreground">{validRows.length}</span> turni pronti per l'esportazione
             </p>
 
             {validRows.length > 0 && (
-              <>
-                <div className="mt-4 hidden overflow-x-auto sm:block">
-                  <table className="w-full text-left text-sm">
-                    <thead>
-                      <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
-                        <th scope="col" className="py-2 pr-3">Data</th>
-                        <th scope="col" className="py-2 pr-3">Codice</th>
-                        <th scope="col" className="py-2 pr-3">Titolo</th>
-                        <th scope="col" className="py-2 pr-3">Inizio</th>
-                        <th scope="col" className="py-2 pr-3">Fine</th>
-                        <th scope="col" className="py-2">Stato</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {validRows.map((r, i) => (
-                        <tr key={i} className="border-b border-border/60">
-                          <td className="py-2 pr-3 whitespace-nowrap">{fmtDate(r.date)}</td>
-                          <td className="py-2 pr-3 font-mono">{r.raw}</td>
-                          <td className="py-2 pr-3 font-mono">{r.title}</td>
-                          <td className="py-2 pr-3 whitespace-nowrap">{r.start}</td>
-                          <td className="py-2 pr-3 whitespace-nowrap">{r.end}</td>
-                          <td className="py-2">Ok</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => download("apple")}
+                  className="rounded-xl bg-gradient-brand px-4 py-4 font-display text-base font-bold text-brand-foreground shadow-soft transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  Scarica per Apple Calendar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => download("google")}
+                  className="rounded-xl border-2 border-brand px-4 py-4 font-display text-base font-bold text-foreground transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  Scarica per Google Calendar
+                </button>
+              </div>
+            )}
 
-                <ul className="mt-4 space-y-2 sm:hidden">
-                  {validRows.map((r, i) => (
-                    <li key={i} className="rounded-lg border border-border p-3 text-sm">
-                      <p className="font-medium text-foreground">{fmtDate(r.date)}</p>
-                      <p className="mt-1 text-muted-foreground">
-                        Codice <span className="font-mono text-foreground">{r.raw}</span> · titolo{" "}
-                        <span className="font-mono text-foreground">{r.title}</span>
-                      </p>
-                      <p className="text-muted-foreground">
-                        {r.start === "Tutto il giorno" ? "Tutto il giorno" : `Dalle ${r.start} alle ${r.end}`}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </>
+            {note && (
+              <p role="status" className="mt-4 rounded-xl bg-muted px-3 py-2 text-sm text-foreground">
+                {note}
+              </p>
+            )}
+
+            {months.length > 0 && (
+              <div className="mt-6 space-y-4">
+                <h3 className="font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">
+                  Anteprima calendario
+                </h3>
+                {months.map((m) => (
+                  <MonthGrid key={`${m.year}-${m.month}`} year={m.year} month={m.month} rows={m.rows} />
+                ))}
+              </div>
             )}
 
             {invalidRows.length > 0 && (
-              <div className="mt-5 rounded-lg border border-destructive/40 bg-destructive/5 p-3">
+              <div className="mt-5 rounded-xl border border-destructive/40 bg-destructive/5 p-3">
                 <h3 className="text-sm font-semibold text-destructive">
                   Codici non riconosciuti ({invalidRows.length}) — non verranno esportati
                 </h3>
                 <ul className="mt-2 space-y-1 text-sm text-foreground">
                   {invalidRows.map((r, i) => (
                     <li key={i}>
-                      {fmtDate(r.date)} — <span className="font-mono">{r.raw}</span> — Codice non riconosciuto
+                      {r.date.getDate()} {MONTHS[r.date.getMonth()]} — <span className="font-mono">{r.raw}</span>
                     </li>
                   ))}
                 </ul>
@@ -424,39 +432,13 @@ function Index() {
             {rows.length === 0 && (
               <p className="mt-3 text-sm text-muted-foreground">Nessun turno presente per questa persona.</p>
             )}
-          </Step>
+          </Card>
         )}
 
-        {selectedPerson && validRows.length > 0 && (
-          <Step n={6} title="Esporta calendario">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => download("apple")}
-                className="rounded-lg bg-primary px-4 py-4 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              >
-                Scarica per Apple Calendar
-              </button>
-              <button
-                type="button"
-                onClick={() => download("google")}
-                className="rounded-lg border border-primary px-4 py-4 text-base font-semibold text-foreground transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              >
-                Scarica per Google Calendar
-              </button>
-            </div>
-            {note && (
-              <p role="status" className="mt-4 rounded-lg bg-muted px-3 py-2 text-sm text-foreground">
-                {note}
-              </p>
-            )}
-          </Step>
-        )}
-      </div>
-
-      <footer className="mt-10 text-center text-xs text-muted-foreground">
-        Nessun dato viene inviato o salvato: tutto avviene nel tuo browser e si azzera al ricaricamento della pagina.
-      </footer>
-    </main>
+        <footer className="pt-4 text-center text-xs text-muted-foreground">
+          Nessun dato viene inviato o salvato: tutto avviene nel tuo browser e si azzera al ricaricamento della pagina.
+        </footer>
+      </main>
+    </div>
   );
 }
