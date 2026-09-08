@@ -387,15 +387,17 @@ function Index() {
                 <button
                   type="button"
                   onClick={() => download("apple")}
-                  className="rounded-xl bg-gradient-brand px-4 py-4 font-display text-base font-bold text-brand-foreground shadow-soft transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-brand px-4 py-4 font-display text-base font-bold text-brand-foreground shadow-soft transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
+                  <span className="rounded bg-accent px-1.5 py-0.5 text-xs font-bold text-accent-foreground">.ics</span>
                   Scarica per Apple Calendar
                 </button>
                 <button
                   type="button"
                   onClick={() => download("google")}
-                  className="rounded-xl border-2 border-brand px-4 py-4 font-display text-base font-bold text-foreground transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-brand px-4 py-4 font-display text-base font-bold text-brand-foreground shadow-soft transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
+                  <span className="rounded bg-accent px-1.5 py-0.5 text-xs font-bold text-accent-foreground">.ics</span>
                   Scarica per Google Calendar
                 </button>
               </div>
