@@ -77,14 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Turni Facili" },
+      { name: "description", content: "Carica il foglio Excel dei turni e scarica il calendario .ics. Tutto nel tuo browser." },
+      { name: "author", content: "Francesco Maria Fuligni" },
+      { property: "og:title", content: "Turni Facili" },
+      { property: "og:description", content: "Carica il foglio Excel dei turni e scarica il calendario .ics." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@francescofuligni" },
     ],
     links: [
       {
