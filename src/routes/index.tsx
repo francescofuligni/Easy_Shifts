@@ -247,8 +247,11 @@ function Index() {
   return (
     <div className="min-h-screen bg-background">
       <div className="bg-gradient-brand">
-        <header className="mx-auto w-full max-w-4xl px-4 py-12 text-center sm:py-16">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.25em] text-brand-foreground/80">
+        <div className="mx-auto flex w-full max-w-4xl justify-end px-4 pt-4">
+          <ThemeToggle />
+        </div>
+        <header className="mx-auto w-full max-w-4xl px-4 pb-12 pt-6 text-center sm:pb-16">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.25em] text-brand-foreground">
             Dai turni al calendario
           </p>
           <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-brand-foreground sm:text-5xl">
