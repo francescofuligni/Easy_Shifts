@@ -258,7 +258,7 @@ function Index() {
           <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-brand-foreground sm:text-5xl">
             Turni Facili
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-sm text-brand-foreground/90 sm:text-base">
+          <p className="mx-auto mt-4 max-w-xl text-sm text-brand-foreground sm:text-base">
             Carica il file Excel dei turni: viene letto il primo foglio del file. Scegli il tuo cognome e scarica il
             calendario. Tutto avviene nel tuo browser, nessun dato viene inviato.
           </p>
