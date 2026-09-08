@@ -3,8 +3,8 @@ export interface CalendarEvent {
   allDay: boolean;
   /** Data del turno (giorno locale) */
   date: Date;
-  startMinutes?: number;
-  durationMinutes?: number;
+  startMinutes?: number | undefined;
+  durationMinutes?: number | undefined;
 }
 
 function pad(n: number): string {
