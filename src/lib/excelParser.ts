@@ -62,7 +62,7 @@ function toDate(value: unknown): Date | null {
 export function cellToText(value: unknown): string {
   if (value === null || value === undefined) return "";
   if (value instanceof Date) return "";
-  return String(value).trim();
+  return String(value).replace(/\s+/g, " ").trim();
 }
 
 /**
