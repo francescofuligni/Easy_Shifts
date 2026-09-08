@@ -4,6 +4,7 @@ import { COMPANY_PROFILES, DEFAULT_PROFILE_ID, getProfile } from "@/lib/companyP
 import { analyseSheet, cellToText, readWorkbook, type SheetLayout, type WorkbookData } from "@/lib/excelParser";
 import { parseShiftCode } from "@/lib/shiftParser";
 import { downloadIcs, generateIcs, safeFileName, type CalendarEvent } from "@/lib/icsGenerator";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Route = createFileRoute("/")({
   head: () => ({
