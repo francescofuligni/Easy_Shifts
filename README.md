@@ -38,32 +38,6 @@ For the **GH Bologna CKIN + LOST** profile:
 - Employees are the rows after the date row that contain a value in column A.
 - Surnames are preserved exactly as written in the spreadsheet, including spaces, asterisks, and symbols.
 
-## Shift codes
-
-| Code | Generated event |
-| --- | --- |
-| Empty cell | No event |
-| `R`, `R1`, `R2`, `RC` | All-day event |
-| `C` | 08:00–22:00 |
-| One-letter code, e.g. `F` or `X` | All-day event |
-| `L0706` | `L070`, 07:00–13:00 |
-| `B1445` | `B144`, 14:40–19:40 |
-| Unrecognized code | No event; clearly shown in the preview |
-
-A complete shift code has this format:
-
-```
-letter + 3 time digits + 1 duration digit
-```
-
-The third time digit represents the tens of minutes:
-
-- `0` → `:00`
-- `3` → `:30`
-- `4` → `:40`
-
-For example, `B1445` becomes a `B144` event from 14:40 to 19:40. If a shift ends after midnight, the event correctly ends on the following day.
-
 ## Calendar export
 
 Easy Shifts generates files compliant with [RFC 5545](https://www.rfc-editor.org/rfc/rfc5545), using the `Europe/Rome` timezone.
@@ -108,15 +82,6 @@ npm run dev
 ## Demo
 
 Try the live app at [turni-facili.lovable.app](https://turni-facili.lovable.app).
-
-## Contributing
-
-To propose an improvement or add support for another Excel format:
-
-1. Create a dedicated branch.
-2. Keep all file and personal-data processing client-side.
-3. Add the new configuration under `companyProfiles`.
-4. Test different month lengths, multiple sheets, duplicate surnames, overnight shifts, and unrecognized codes.
 
 ---
 
