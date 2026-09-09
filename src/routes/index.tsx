@@ -239,7 +239,7 @@ function Index() {
   return (
     <div className="min-h-screen bg-background">
       <div className="bg-gradient-brand">
-        <div className="mx-auto flex w-full max-w-4xl flex-wrap justify-end gap-2 px-4 pt-4">
+        <div className="mx-auto flex w-full max-w-4xl flex-wrap justify-end gap-1.5 px-4 pt-2 sm:pt-3">
           <LanguageToggle />
           <ThemeToggle />
         </div>

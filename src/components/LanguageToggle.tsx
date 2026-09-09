@@ -12,7 +12,7 @@ export function LanguageToggle() {
     <div
       role="group"
       aria-label={t.langLabel}
-      className="inline-flex items-center gap-1 rounded-full border border-brand-foreground/50 bg-brand-foreground/10 p-1"
+      className="inline-flex items-center rounded-full border border-brand-foreground/30 bg-brand-foreground/5 p-0.5"
     >
       {OPTIONS.map((o) => {
         const active = lang === o.value;
@@ -22,10 +22,10 @@ export function LanguageToggle() {
             type="button"
             aria-pressed={active}
             onClick={() => setLang(o.value)}
-            className={`rounded-full px-3 py-1.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
+            className={`rounded-full px-2 py-1 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-foreground/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent ${
               active
-                ? "bg-accent text-accent-foreground"
-                : "text-brand-foreground hover:bg-brand-foreground/20"
+                ? "bg-brand-foreground/20 text-brand-foreground"
+                : "text-brand-foreground/70 hover:text-brand-foreground hover:bg-brand-foreground/10"
             }`}
           >
             {o.label}

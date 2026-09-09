@@ -31,9 +31,9 @@ export function ThemeToggle() {
       aria-checked={isDark}
       aria-label={isDark ? t.themeToLight : t.themeToDark}
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="inline-flex items-center gap-2 rounded-full border border-brand-foreground/50 bg-brand-foreground/10 px-3 py-2 text-sm font-semibold text-brand-foreground transition-colors hover:bg-brand-foreground/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+      className="inline-flex items-center gap-1.5 rounded-full border border-brand-foreground/30 bg-brand-foreground/5 px-2 py-1 text-xs font-medium text-brand-foreground/90 transition-colors hover:bg-brand-foreground/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-foreground/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
     >
-      <span aria-hidden="true">{isDark ? "☀" : "☾"}</span>
+      <span aria-hidden="true" className="text-sm">{isDark ? "☀" : "☾"}</span>
       {isDark ? t.themeLight : t.themeDark}
     </button>
   );
