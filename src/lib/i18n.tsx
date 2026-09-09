@@ -10,6 +10,8 @@ interface Dict {
   themeLight: string;
   themeDark: string;
   langLabel: string;
+  siteTitle: string;
+
   kicker: string;
   intro: string;
   step1: string;
@@ -52,6 +54,8 @@ const it: Dict = {
   themeLight: "Chiaro",
   themeDark: "Scuro",
   langLabel: "Lingua",
+  siteTitle: "Turni Facili",
+
   kicker: "Dai turni al calendario",
   intro:
     "Carica il file Excel dei turni: viene letto il primo foglio del file. Scegli il tuo cognome e scarica il calendario. Tutto avviene nel tuo browser, nessun dato viene inviato.",
@@ -97,6 +101,8 @@ const en: Dict = {
   themeLight: "Light",
   themeDark: "Dark",
   langLabel: "Language",
+  siteTitle: "Easy Shifts",
+
   kicker: "From shifts to your calendar",
   intro:
     "Upload the Excel shift file: the first sheet is used. Pick your surname and download the calendar. Everything happens in your browser, no data is sent.",
