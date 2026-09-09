@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { COMPANY_PROFILES, DEFAULT_PROFILE_ID, getProfile } from "@/lib/companyProfiles";
 import { analyseSheet, cellToText, readWorkbook, type SheetLayout, type WorkbookData } from "@/lib/excelParser";
 import { parseShiftCode } from "@/lib/shiftParser";
@@ -124,7 +125,12 @@ function MonthGrid({ year, month, rows }: { year: number; month: number; rows: P
 }
 
 function Index() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+
+  useEffect(() => {
+    document.title = `${t.siteTitle} | ${t.kicker}`;
+  }, [t]);
+
   const [profileId, setProfileId] = useState(DEFAULT_PROFILE_ID);
   const [file, setFile] = useState<File | null>(null);
   const [workbook, setWorkbook] = useState<WorkbookData | null>(null);
@@ -248,8 +254,9 @@ function Index() {
             {t.kicker}
           </p>
           <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-brand-foreground sm:text-5xl">
-            Turni Facili
+            {t.siteTitle}
           </h1>
+
           <p className="mx-auto mt-4 max-w-xl text-sm text-brand-foreground sm:text-base">{t.intro}</p>
         </header>
       </div>
