@@ -1,102 +1,102 @@
-# Turni → Calendario
+# Easy Shifts
 
-**Turni → Calendario** è una web app statica che converte un file Excel contenente i turni di lavoro in un calendario `.ics`, pronto da importare in Apple Calendar o Google Calendar.
+**Easy Shifts** is a static web app that converts an Excel work-shift schedule into an `.ics` calendar file, ready to import into Apple Calendar or Google Calendar.
 
-L'app è progettata per funzionare interamente nel browser: i file Excel e i dati delle persone non vengono caricati, inviati o salvati su alcun server.
+The app runs entirely in the browser: Excel files and personal data are never uploaded, sent, or stored on a server.
 
-> Profilo attualmente supportato: **GH Bologna CKIN + LOST**
+> Currently supported company profile: **GH Bologna CKIN + LOST**
 
-## Funzionalità
+## Features
 
-- Caricamento locale di file `.xlsx` e `.xls`
-- Supporto per workbook con uno o più fogli
-- Rilevamento automatico della riga delle date e delle colonne del mese
-- Selezione e ricerca della persona interessata
-- Gestione di cognomi duplicati tramite il numero di riga
-- Anteprima cronologica dei turni, inclusi i codici non riconosciuti
-- Esportazione di un file `.ics` compatibile con Apple Calendar e Google Calendar
-- Interfaccia accessibile, responsive e interamente in italiano
+- Local upload of `.xlsx` and `.xls` files
+- Support for workbooks with one or multiple sheets
+- Automatic detection of the date row and schedule columns
+- Employee search and selection
+- Duplicate surnames remain distinguishable through their row number
+- Chronological shift preview, including unrecognized codes
+- `.ics` export compatible with Apple Calendar and Google Calendar
+- Accessible, responsive, Italian-language interface
 
 ## Privacy
 
-Il file caricato viene elaborato solo localmente nel browser.
+Your uploaded file is processed locally in your browser.
 
-- Nessun backend, database, account o autenticazione
-- Nessun upload o conservazione di file Excel e dati personali
-- Nessuna integrazione con Google Calendar, Google OAuth o API esterne
-- Nessun cookie di tracciamento o analytics
+- No backend, database, user account, or authentication
+- No upload or retention of Excel files or personal data
+- No Google Calendar integration, Google OAuth, or external APIs
+- No tracking cookies or analytics
 
-Ricaricando la pagina, tutti i dati elaborati vengono rimossi.
+All processed data is removed when the page is refreshed.
 
-## Formato Excel supportato
+## Supported Excel format
 
-Per il profilo **GH Bologna CKIN + LOST**:
+For the **GH Bologna CKIN + LOST** profile:
 
-- I cognomi sono nella prima colonna (A).
-- La riga contenente più celle di tipo data viene rilevata automaticamente.
-- Le colonne contenenti date valide vengono individuate dinamicamente: sono supportati mesi da 28 a 31 giorni e qualsiasi anno.
-- Le persone sono le righe successive alla riga delle date con un valore in colonna A.
-- I cognomi vengono mantenuti esattamente come presenti nel file, inclusi spazi, asterischi e simboli.
+- Surnames are in the first column (A).
+- The row with the largest number of date cells is detected automatically.
+- Columns with valid dates are detected dynamically, supporting months with 28 to 31 days in any year.
+- Employees are the rows after the date row that contain a value in column A.
+- Surnames are preserved exactly as written in the spreadsheet, including spaces, asterisks, and symbols.
 
-## Codici turno
+## Shift codes
 
-| Codice | Evento generato |
+| Code | Generated event |
 | --- | --- |
-| Cella vuota | Nessun evento |
-| `R`, `R1`, `R2`, `RC` | Evento per l'intera giornata |
-| `C` | Dalle 08:00 alle 22:00 |
-| Singola lettera, ad es. `F` o `X` | Evento per l'intera giornata |
-| `L0706` | Evento `L070`, dalle 07:00 alle 13:00 |
-| `B1445` | Evento `B144`, dalle 14:40 alle 19:40 |
-| Codice non riconosciuto | Nessun evento; indicato chiaramente nell'anteprima |
+| Empty cell | No event |
+| `R`, `R1`, `R2`, `RC` | All-day event |
+| `C` | 08:00–22:00 |
+| One-letter code, e.g. `F` or `X` | All-day event |
+| `L0706` | `L070`, 07:00–13:00 |
+| `B1445` | `B144`, 14:40–19:40 |
+| Unrecognized code | No event; clearly shown in the preview |
 
-Un codice turno completo segue il formato:
+A complete shift code has this format:
 
 ```
-lettera + 3 cifre dell'orario + 1 cifra della durata
+letter + 3 time digits + 1 duration digit
 ```
 
-La terza cifra dell'orario rappresenta le decine dei minuti:
+The third time digit represents the tens of minutes:
 
 - `0` → `:00`
 - `3` → `:30`
 - `4` → `:40`
 
-Se la fine del turno supera la mezzanotte, l'evento termina correttamente il giorno successivo.
+For example, `B1445` becomes a `B144` event from 14:40 to 19:40. If a shift ends after midnight, the event correctly ends on the following day.
 
-## Esportazione calendario
+## Calendar export
 
-L'app crea file conformi a [RFC 5545](https://www.rfc-editor.org/rfc/rfc5545), con fuso orario `Europe/Rome`.
+Easy Shifts generates files compliant with [RFC 5545](https://www.rfc-editor.org/rfc/rfc5545), using the `Europe/Rome` timezone.
 
-- Gli eventi giornalieri usano una data di fine corrispondente al giorno successivo.
-- I turni con orario riportano inizio e fine corretti.
-- I titoli vengono sottoposti a escape per il formato ICS.
-- Non vengono aggiunti colori, descrizioni, invitati, promemoria o metadati proprietari.
-- Il file esportato ha un nome simile a `turni-rossi-settembre-2026.ics`.
+- All-day events end on the following date, as required by ICS.
+- Timed shifts include the correct start and end times.
+- ICS titles are safely escaped.
+- No colors, descriptions, guests, reminders, or proprietary metadata are added.
+- Exported files use names similar to `shifts-rossi-september-2026.ics`.
 
-I pulsanti “Scarica per Apple Calendar” e “Scarica per Google Calendar” generano lo stesso file `.ics`.
+The Apple Calendar and Google Calendar download buttons both generate the same `.ics` file.
 
-## Tecnologie
+## Tech stack
 
 - React
 - TypeScript
-- [SheetJS / xlsx](https://sheetjs.com/) per la lettura locale dei file Excel
-- Generazione ICS nel browser
+- [SheetJS / xlsx](https://sheetjs.com/) for local Excel parsing
+- In-browser ICS generation
 
-L'architettura è predisposta per aggiungere nuovi formati aziendali senza riscrivere l'app:
+The architecture is designed to support additional company formats without rewriting the application:
 
 ```
 src/
-├── companyProfiles/  # configurazioni per azienda/formato
-├── excelParser/      # lettura e individuazione dei dati Excel
-├── shiftParser/      # interpretazione dei codici turno
-├── icsGenerator/     # generazione dei file .ics
-└── components/       # componenti dell'interfaccia
+├── companyProfiles/  # company/format configurations
+├── excelParser/      # Excel parsing and data detection
+├── shiftParser/      # shift-code interpretation
+├── icsGenerator/     # .ics file generation
+└── components/       # UI components
 ```
 
-## Avvio in locale
+## Run locally
 
-Sono necessari Node.js e npm.
+Node.js and npm are required.
 
 ```sh
 git clone https://github.com/francescofuligni/Easy_Shifts.git
@@ -107,17 +107,17 @@ npm run dev
 
 ## Demo
 
-L'app è disponibile su [turni-facili.lovable.app](https://turni-facili.lovable.app).
+Try the live app at [turni-facili.lovable.app](https://turni-facili.lovable.app).
 
-## Contributi
+## Contributing
 
-Per proporre miglioramenti o supportare un nuovo formato Excel:
+To propose an improvement or add support for another Excel format:
 
-1. crea un branch dedicato;
-2. mantieni l'elaborazione dei dati esclusivamente lato client;
-3. aggiungi la configurazione in `companyProfiles`;
-4. verifica i casi limite: mesi di diversa durata, fogli multipli, cognomi duplicati, turni notturni e codici non riconosciuti.
+1. Create a dedicated branch.
+2. Keep all file and personal-data processing client-side.
+3. Add the new configuration under `companyProfiles`.
+4. Test different month lengths, multiple sheets, duplicate surnames, overnight shifts, and unrecognized codes.
 
 ---
 
-Realizzato con [Lovable](https://lovable.dev).
+Built with [Lovable](https://lovable.dev).
