@@ -124,14 +124,15 @@ function MonthGrid({ year, month, rows }: { year: number; month: number; rows: P
 }
 
 function Index() {
+  const { t } = useI18n();
   const [profileId, setProfileId] = useState(DEFAULT_PROFILE_ID);
   const [file, setFile] = useState<File | null>(null);
   const [workbook, setWorkbook] = useState<WorkbookData | null>(null);
   const [personRow, setPersonRow] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<"unsupported" | "noSheets" | "unreadable" | null>(null);
   const [loading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const [note, setNote] = useState<string | null>(null);
+  const [note, setNote] = useState<"apple" | "google" | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const profile = getProfile(profileId);
@@ -168,9 +169,10 @@ function Index() {
         date: day.date,
         raw: parsed.raw,
         title: parsed.title!,
-        start: parsed.allDay ? "Tutto il giorno" : fmtTime(day.date, parsed.startMinutes!),
-        end: parsed.allDay ? "Tutto il giorno" : fmtTime(day.date, parsed.startMinutes! + parsed.durationMinutes!),
+        start: parsed.allDay ? "" : fmtTime(day.date, parsed.startMinutes!),
+        end: parsed.allDay ? "" : fmtTime(day.date, parsed.startMinutes! + parsed.durationMinutes!),
         ok: true,
+        allDayLabel: !!parsed.allDay,
         event,
       });
     }
@@ -209,13 +211,17 @@ function Index() {
     try {
       const name = file.name.toLowerCase();
       if (!name.endsWith(".xlsx") && !name.endsWith(".xls")) {
-        throw new Error("Formato non supportato. Carica un file .xlsx o .xls.");
+        setError("unsupported");
+        return;
       }
       const data = await readWorkbook(file);
-      if (data.sheetNames.length === 0) throw new Error("Il file non contiene fogli leggibili.");
+      if (data.sheetNames.length === 0) {
+        setError("noSheets");
+        return;
+      }
       setWorkbook(data);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Impossibile leggere il file.");
+    } catch {
+      setError("unreadable");
     } finally {
       setLoading(false);
     }
@@ -227,11 +233,7 @@ function Index() {
     const firstDate = validRows[0]!.date;
     const ics = generateIcs(events, profile.timeZone);
     downloadIcs(ics, safeFileName(selectedPerson.name, firstDate.getMonth() + 1, firstDate.getFullYear()));
-    setNote(
-      kind === "apple"
-        ? "Apri il file scaricato con Calendario e scegli il calendario di destinazione."
-        : "Importa il file scaricato in Google Calendar da computer, scegliendo il calendario di destinazione.",
-    );
+    setNote(kind);
   }
 
   return (
