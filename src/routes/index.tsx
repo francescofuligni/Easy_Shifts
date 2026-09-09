@@ -239,27 +239,25 @@ function Index() {
   return (
     <div className="min-h-screen bg-background">
       <div className="bg-gradient-brand">
-        <div className="mx-auto flex w-full max-w-4xl justify-end px-4 pt-4">
+        <div className="mx-auto flex w-full max-w-4xl flex-wrap justify-end gap-2 px-4 pt-4">
+          <LanguageToggle />
           <ThemeToggle />
         </div>
         <header className="mx-auto w-full max-w-4xl px-4 pb-12 pt-6 text-center sm:pb-16">
           <p className="font-display text-xs font-semibold uppercase tracking-[0.25em] text-brand-foreground">
-            Dai turni al calendario
+            {t.kicker}
           </p>
           <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-brand-foreground sm:text-5xl">
             Turni Facili
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-sm text-brand-foreground sm:text-base">
-            Carica il file Excel dei turni: viene letto il primo foglio del file. Scegli il tuo cognome e scarica il
-            calendario. Tutto avviene nel tuo browser, nessun dato viene inviato.
-          </p>
+          <p className="mx-auto mt-4 max-w-xl text-sm text-brand-foreground sm:text-base">{t.intro}</p>
         </header>
       </div>
 
       <main className="mx-auto -mt-8 w-full max-w-4xl space-y-5 px-4 pb-16">
-        <Card step={1} title="Carica il file e scegli l'azienda">
+        <Card step={1} title={t.step1}>
           <label htmlFor="azienda" className="mb-2 block text-sm font-medium text-foreground">
-            Azienda / formato
+            {t.companyLabel}
           </label>
           <select
             id="azienda"
@@ -294,19 +292,19 @@ function Index() {
               dragging ? "border-brand bg-brand-soft" : "border-border bg-muted/40"
             }`}
           >
-            <p className="text-sm text-muted-foreground">Trascina qui il file Excel oppure</p>
+            <p className="text-sm text-muted-foreground">{t.dropHint}</p>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
               className="mt-3 inline-flex items-center justify-center rounded-xl border border-brand bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
-              Scegli file
+              {t.chooseFile}
             </button>
             <input
               ref={inputRef}
               type="file"
               accept=".xlsx,.xls"
-              aria-label="Carica il file Excel dei turni"
+              aria-label={t.fileInputLabel}
               className="sr-only"
               onChange={(e) => {
                 const f = e.target.files?.[0];
@@ -316,7 +314,7 @@ function Index() {
             />
             {file && (
               <p className="mt-3 text-sm text-foreground">
-                File scelto: <span className="font-semibold">{file.name}</span>
+                {t.chosenFile} <span className="font-semibold">{file.name}</span>
               </p>
             )}
           </div>
@@ -327,25 +325,25 @@ function Index() {
             onClick={() => void process()}
             className="mt-4 w-full rounded-xl bg-gradient-brand px-4 py-4 font-display text-base font-bold text-brand-foreground shadow-soft transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {loading ? "Lettura in corso…" : "Ottieni calendario"}
+            {loading ? t.reading : t.getCalendar}
           </button>
 
           {error && (
             <p role="alert" className="mt-3 rounded-xl bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
-              {error}
+              {error === "unsupported" ? t.errUnsupported : error === "noSheets" ? t.errNoSheets : t.errUnreadable}
             </p>
           )}
           {workbook && !layout && (
             <p role="alert" className="mt-3 rounded-xl bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
-              Nel primo foglio non sono state trovate date o persone valide. Verifica il file.
+              {t.errNoLayout}
             </p>
           )}
         </Card>
 
         {layout && (
-          <Card step={2} title="Scegli il cognome">
+          <Card step={2} title={t.step2}>
             <label htmlFor="cognome" className="mb-2 block text-sm font-medium text-foreground">
-              Cognome ({layout.people.length} trovati nel file)
+              {t.surnameLabel(layout.people.length)}
             </label>
             <select
               id="cognome"
@@ -356,10 +354,10 @@ function Index() {
               }}
               className="w-full rounded-xl border border-input bg-background px-3 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             >
-              <option value="">— Seleziona un cognome —</option>
+              <option value="">{t.selectSurname}</option>
               {layout.people.map((p) => (
                 <option key={p.rowIndex} value={p.rowIndex}>
-                  {p.name} (riga {p.excelRow})
+                  {p.name} ({t.rowWord} {p.excelRow})
                 </option>
               ))}
             </select>
@@ -367,10 +365,10 @@ function Index() {
         )}
 
         {selectedPerson && (
-          <Card step={3} title="Esporta e controlla il calendario">
+          <Card step={3} title={t.step3}>
             <p className="text-sm text-muted-foreground">
               <span className="font-semibold text-foreground">{selectedPerson.name}</span> ·{" "}
-              <span className="font-semibold text-foreground">{validRows.length}</span> turni pronti per l'esportazione
+              <span className="font-semibold text-foreground">{validRows.length}</span> {t.shiftsReady}
             </p>
 
             {validRows.length > 0 && (
@@ -381,7 +379,7 @@ function Index() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-brand px-4 py-4 font-display text-base font-bold text-brand-foreground shadow-soft transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
                   <span className="rounded bg-accent px-1.5 py-0.5 text-xs font-bold text-accent-foreground">.ics</span>
-                  Scarica per Apple Calendar
+                  {t.downloadApple}
                 </button>
                 <button
                   type="button"
@@ -389,21 +387,21 @@ function Index() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-brand px-4 py-4 font-display text-base font-bold text-brand-foreground shadow-soft transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
                   <span className="rounded bg-accent px-1.5 py-0.5 text-xs font-bold text-accent-foreground">.ics</span>
-                  Scarica per Google Calendar
+                  {t.downloadGoogle}
                 </button>
               </div>
             )}
 
             {note && (
               <p role="status" className="mt-4 rounded-xl bg-muted px-3 py-2 text-sm text-foreground">
-                {note}
+                {note === "apple" ? t.noteApple : t.noteGoogle}
               </p>
             )}
 
             {months.length > 0 && (
               <div className="mt-6 space-y-4">
                 <h3 className="font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">
-                  Anteprima calendario
+                  {t.previewTitle}
                 </h3>
                 {months.map((m) => (
                   <MonthGrid key={`${m.year}-${m.month}`} year={m.year} month={m.month} rows={m.rows} />
@@ -414,12 +412,12 @@ function Index() {
             {invalidRows.length > 0 && (
               <div className="mt-5 rounded-xl border border-destructive/40 bg-destructive/5 p-3">
                 <h3 className="text-sm font-semibold text-destructive">
-                  Codici non riconosciuti ({invalidRows.length}) — non verranno esportati
+                  {t.unrecognized(invalidRows.length)}
                 </h3>
                 <ul className="mt-2 space-y-1 text-sm text-foreground">
                   {invalidRows.map((r, i) => (
                     <li key={i}>
-                      {r.date.getDate()} {MONTHS[r.date.getMonth()]} — <span className="font-mono">{r.raw}</span>
+                      {r.date.getDate()} {t.months[r.date.getMonth()]} — <span className="font-mono">{r.raw}</span>
                     </li>
                   ))}
                 </ul>
@@ -427,13 +425,13 @@ function Index() {
             )}
 
             {rows.length === 0 && (
-              <p className="mt-3 text-sm text-muted-foreground">Nessun turno presente per questa persona.</p>
+              <p className="mt-3 text-sm text-muted-foreground">{t.noShifts}</p>
             )}
           </Card>
         )}
 
         <footer className="space-y-3 pt-6 text-center text-xs text-muted-foreground">
-          <p>Nessun dato viene inviato o salvato: tutto avviene nel tuo browser e si azzera al ricaricamento della pagina.</p>
+          <p>{t.privacy}</p>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <a
               href="https://github.com/francescofuligni"
