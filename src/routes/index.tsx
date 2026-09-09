@@ -5,6 +5,8 @@ import { analyseSheet, cellToText, readWorkbook, type SheetLayout, type Workbook
 import { parseShiftCode } from "@/lib/shiftParser";
 import { downloadIcs, generateIcs, safeFileName, type CalendarEvent } from "@/lib/icsGenerator";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageToggle } from "@/components/LanguageToggle";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,24 +36,10 @@ interface PreviewRow {
   start: string;
   end: string;
   ok: boolean;
+  allDayLabel?: boolean;
   event?: CalendarEvent;
 }
 
-const MONTHS = [
-  "gennaio",
-  "febbraio",
-  "marzo",
-  "aprile",
-  "maggio",
-  "giugno",
-  "luglio",
-  "agosto",
-  "settembre",
-  "ottobre",
-  "novembre",
-  "dicembre",
-];
-const WEEK_LABELS = ["lun", "mar", "mer", "gio", "ven", "sab", "dom"];
 
 function fmtTime(base: Date, minutes: number): string {
   const d = new Date(base);
@@ -75,6 +63,7 @@ function Card({ step, title, children }: { step: number; title: string; children
 
 /** Griglia mensile con i turni */
 function MonthGrid({ year, month, rows }: { year: number; month: number; rows: PreviewRow[] }) {
+  const { t } = useI18n();
   const byDay = new Map<number, PreviewRow>();
   for (const r of rows) byDay.set(r.date.getDate(), r);
 
@@ -90,10 +79,10 @@ function MonthGrid({ year, month, rows }: { year: number; month: number; rows: P
   return (
     <div className="rounded-2xl border border-border bg-background p-3 sm:p-4">
       <h3 className="mb-3 font-display text-base font-bold capitalize text-foreground">
-        {MONTHS[month]} {year}
+        {t.months[month]} {year}
       </h3>
       <div className="grid grid-cols-7 gap-1 text-center text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground">
-        {WEEK_LABELS.map((w) => (
+        {t.weekdays.map((w) => (
           <div key={w} className="py-1">
             {w}
           </div>
@@ -120,7 +109,7 @@ function MonthGrid({ year, month, rows }: { year: number; month: number; rows: P
                     <span className="mt-0.5 block text-[0.7rem] font-bold leading-tight text-foreground">
                       {shift.title}
                       <span className="block font-medium">
-                        {shift.start === "Tutto il giorno" ? "tutto il giorno" : `${shift.start}–${shift.end}`}
+                        {shift.allDayLabel ? t.allDay : `${shift.start}–${shift.end}`}
                       </span>
                     </span>
                   )}
